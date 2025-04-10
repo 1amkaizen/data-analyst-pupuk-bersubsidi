@@ -75,8 +75,17 @@ streamlit run dashboard.py
 
 ---
 
-## 🌐 Live Demo 
-[Streamlit Cloud](https://streamlit.io/cloud):
-[https://yourname-pupuk.streamlit.app](#)
-```
+## 🌐 Live Demo
 
+📺 Coba langsung dashboard interaktif hasil analisis ini:
+
+👉 [Klik untuk membuka di Streamlit Cloud](https://data-analyst-pupuk-bersubsidi.streamlit.app/)
+
+**Fitur dalam demo:**
+- Visualisasi distribusi dan tren penyaluran pupuk per tahun & kota
+- Top 10 kabupaten penerima pupuk jenis UREA
+- Clusterisasi kabupaten berdasarkan pola penyaluran
+- Prediksi kebutuhan pupuk nasional hingga tahun 2026 (model Prophet)
+- Dashboard responsif berbasis Streamlit & Plotly
+
+```
