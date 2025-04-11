@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from prophet import Prophet
+
 
 # ========== JUDUL ==========
 st.title("📊 Dashboard Penyaluran Pupuk Bersubsidi")
@@ -53,18 +55,38 @@ fig6 = px.bar(cluster_stats, x='jenis_pupuk', y='volume', color='cluster', barmo
 fig6.update_layout(title='Rata-rata Volume Pupuk per Cluster')
 st.plotly_chart(fig6)
 
-# ========== VISUAL 7: PROPHET FORECAST ==========
+# ========== VISUAL 7: PROPHET FORECAST (DYNAMIC) ==========
 st.subheader("🔮 Forecast Volume Nasional (Prophet)")
 
-# Load forecast hasil Prophet
-forecast = pd.read_csv('forecast_result.csv')  # simpan hasil forecast sebelumnya
+# Agregasi data tahunan
+ts_df = df.groupby('tahun')['volume'].sum().reset_index()
+ts_df.columns = ['ds', 'y']
+ts_df['ds'] = pd.to_datetime(ts_df['ds'], format='%Y')
 
+# Input dari user
+n_years = st.number_input("Berapa tahun ke depan ingin diprediksi?", min_value=1, max_value=10, value=3, step=1)
+
+# Inisialisasi model
+model = Prophet()
+model.fit(ts_df)
+
+# Buat future dataframe
+future = model.make_future_dataframe(periods=n_years, freq='Y')
+forecast = model.predict(future)
+
+# Visualisasi interaktif
 fig7 = go.Figure()
 fig7.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Prediksi', line=dict(color='royalblue')))
 fig7.add_trace(go.Scatter(
     x=forecast['ds'].tolist() + forecast['ds'][::-1].tolist(),
     y=forecast['yhat_upper'].tolist() + forecast['yhat_lower'][::-1].tolist(),
-    fill='toself', fillcolor='rgba(173,216,230,0.3)', line=dict(color='rgba(255,255,255,0)'),
-    hoverinfo="skip", showlegend=True, name='Rentang Prediksi'))
-fig7.update_layout(title='Forecast Volume Pupuk Nasional', xaxis_title='Tahun', yaxis_title='Volume (TON)', template='plotly_white')
+    fill='toself', fillcolor='rgba(173,216,230,0.3)',
+    line=dict(color='rgba(255,255,255,0)'), hoverinfo="skip",
+    showlegend=True, name='Rentang Prediksi'))
+
+fig7.update_layout(
+    title='📈 Forecast Volume Pupuk Nasional',
+    xaxis_title='Tahun', yaxis_title='Volume (TON)', template='plotly_white'
+)
 st.plotly_chart(fig7)
+
